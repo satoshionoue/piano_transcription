@@ -254,6 +254,8 @@ def train(args):
         loss = loss_func(model, batch_output_dict, batch_data_dict)
 
         print(iteration, loss)
+        os.system('echo "#epoch,train_ent\t'+str(iteration)+'\t'+str(loss.item())+'" >> loss_log/log_loss.txt')
+        print("#epoch,train_ent", iteration, loss.item())
 
         # Backward
         loss.backward()

@@ -56,6 +56,52 @@ def init_gru(rnn):
         torch.nn.init.constant_(getattr(rnn, 'bias_hh_l{}'.format(i)), 0)
 
 
+# class ConvBlock(nn.Module):
+#     def __init__(self, in_channels, out_channels, momentum):
+        
+#         super(ConvBlock, self).__init__()
+        
+#         self.conv1 = nn.Conv2d(in_channels=in_channels, 
+#                               out_channels=out_channels,
+#                               kernel_size=(3, 3), stride=(1, 1),
+#                               padding=(1, 1), bias=False)
+                              
+#         self.conv2 = nn.Conv2d(in_channels=out_channels, 
+#                               out_channels=out_channels,
+#                               kernel_size=(3, 3), stride=(1, 1),
+#                               padding=(1, 1), bias=False)
+                              
+#         self.bn1 = nn.BatchNorm2d(out_channels, momentum)
+#         self.bn2 = nn.BatchNorm2d(out_channels, momentum)
+
+#         self.init_weight()
+        
+#     def init_weight(self):
+#         init_layer(self.conv1)
+#         init_layer(self.conv2)
+#         init_bn(self.bn1)
+#         init_bn(self.bn2)
+
+        
+#     def forward(self, input, pool_size=(2, 2), pool_type='avg'):
+#         """
+#         Args:
+#           input: (batch_size, in_channels, time_steps, freq_bins)
+
+#         Outputs:
+#           output: (batch_size, out_channels, classes_num)
+#         """
+
+#         x = F.relu_(self.bn1(self.conv1(input)))
+#         x = F.relu_(self.bn2(self.conv2(x)))
+        
+#         if pool_type == 'avg':
+#             x = F.avg_pool2d(x, kernel_size=pool_size)
+        
+#         return x
+
+# ...existing code...
+
 class ConvBlock(nn.Module):
     def __init__(self, in_channels, out_channels, momentum):
         
@@ -92,13 +138,15 @@ class ConvBlock(nn.Module):
           output: (batch_size, out_channels, classes_num)
         """
 
-        x = F.relu_(self.bn1(self.conv1(input)))
-        x = F.relu_(self.bn2(self.conv2(x)))
+        x = F.relu(self.bn1(self.conv1(input)))   # 修正: F.relu_ → F.relu
+        x = F.relu(self.bn2(self.conv2(x)))       # 修正: F.relu_ → F.relu
         
         if pool_type == 'avg':
             x = F.avg_pool2d(x, kernel_size=pool_size)
         
         return x
+
+# ...existing code...
 
 
 class AcousticModelCRnn8Dropout(nn.Module):
@@ -146,7 +194,7 @@ class AcousticModelCRnn8Dropout(nn.Module):
 
         x = x.transpose(1, 2).flatten(2)
         x = F.relu(self.bn5(self.fc5(x).transpose(1, 2)).transpose(1, 2))
-        x = F.dropout(x, p=0.5, training=self.training, inplace=True)
+        x = F.dropout(x, p=0.5, training=self.training, inplace=False)
         
         (x, _) = self.gru(x)
         x = F.dropout(x, p=0.5, training=self.training, inplace=False)

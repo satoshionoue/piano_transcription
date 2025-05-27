@@ -4,4 +4,16 @@
 *.hdf5
 *.pyc
 __pycache__
+*.pdf
+checkpoints
+ckpts
+fig
+hdf5s
+logs
+loss_log
+probs
+result_test
+results
+statistics
+venv
 

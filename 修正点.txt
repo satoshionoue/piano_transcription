@@ -1,0 +1,8 @@
+- requirementsをpython3.8用に書き換えた
+- バッチサイズを12→6に変更した（メモリサイズの都合）
+- 勾配のインプレイス演算をfalseにした
+# ...existing code...
+        x = F.relu(self.bn5(self.fc5(x).transpose(1, 2)).transpose(1, 2))
+        x = F.dropout(x, p=0.5, training=self.training, inplace=False)  # 修正: inplace=True → inplace=False
+# ...existing code...
+- inference.pyの中で結果の確率スペクトログラムを生成できるようにした（visualize for debugを参照）
