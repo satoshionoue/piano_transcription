@@ -56,10 +56,9 @@ def infer_prob(args):
 
     # Paths
     hdf5s_dir = os.path.join(workspace, 'hdf5s', dataset)
-    probs_dir = os.path.join(workspace, 'probs', 
-        'model_type={}'.format(model_type), 
-        'augmentation={}'.format(augmentation), 'dataset={}'.format(dataset), 
-        'split={}'.format(split))
+
+    checkpoint_dirname = os.path.basename(os.path.normpath(checkpoint_path))
+    probs_dir = os.path.join(workspace, 'probs', checkpoint_dirname)
     create_folder(probs_dir)
 
     # Transcriptor
@@ -335,9 +334,9 @@ def calculate_metrics(args, thresholds=None):
 
     # Paths
     hdf5s_dir = os.path.join(workspace, 'hdf5s', dataset)
-    probs_dir = os.path.join(workspace, 'probs', 'model_type={}'.format(model_type), 
-        'augmentation={}'.format(augmentation), 'dataset={}'.format(dataset), 'split={}'.format(split))
-
+    checkpoint_dirname = os.path.basename(os.path.normpath(args.checkpoint_path))
+    probs_dir = os.path.join(workspace, 'probs', checkpoint_dirname)
+    
     # Score calculator
     score_calculator = ScoreCalculator(hdf5s_dir, probs_dir, split=split, post_processor_type=post_processor_type)
 
