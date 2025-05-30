@@ -1,0 +1,81 @@
+Iteration: 40000
+Time: 230.957
+frame_precision: 0.8238
+frame_recall: 0.8844
+frame_f1: 0.8516
+note_precision: 0.7349
+note_recall: 0.7144
+note_f1: 0.7243
+
+Iteration: 60000
+Time: 227.764
+frame_precision: 0.8548
+frame_recall: 0.8843
+frame_f1: 0.8681
+note_precision: 0.7696
+note_recall: 0.7399
+note_f1: 0.7542
+
+Iteration: 80000
+Time: 228.496
+frame_precision: 0.8625
+frame_recall: 0.8909
+frame_f1: 0.8754
+note_precision: 0.7805
+note_recall: 0.7536
+note_f1: 0.7666
+
+Iteration: 120000
+Time: 226.509
+frame_precision: 0.8678
+frame_recall: 0.9018
+frame_f1: 0.8836
+note_precision: 0.7956
+note_recall: 0.7708
+note_f1: 0.7828
+
+Iteration: 180000
+Time: 227.695
+frame_precision: 0.8821
+frame_recall: 0.9018
+frame_f1: 0.8909
+note_precision: 0.8094
+note_recall: 0.7865
+note_f1: 0.7976
+
+Iteration: 220000
+Time: 210.977
+frame_precision: 0.8844
+frame_recall: 0.9022
+frame_f1: 0.8924
+note_precision: 0.8126
+note_recall: 0.7889
+note_f1: 0.8004
+
+Iteration: 260000
+Time: 208.996
+frame_precision: 0.8860
+frame_recall: 0.9028
+frame_f1: 0.8935
+note_precision: 0.8137
+note_recall: 0.7913
+note_f1: 0.8022
+
+Iteration: 280000
+Time: 209.819
+frame_precision: 0.8851
+frame_recall: 0.9035
+frame_f1: 0.8933
+note_precision: 0.8142
+note_recall: 0.7910
+note_f1: 0.8023
+
+Iteration: 300000
+Time: 210.323
+frame_precision: 0.8884
+frame_recall: 0.9019
+frame_f1: 0.8943
+note_precision: 0.8166
+note_recall: 0.7921
+note_f1: 0.8040
+

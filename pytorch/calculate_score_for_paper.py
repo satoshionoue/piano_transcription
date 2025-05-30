@@ -18,6 +18,8 @@ from utilities import (create_folder, get_filename, traverse_folder,
     OnsetsFramesPostProcessor)
 import config
 from inference import PianoTranscription
+import warnings
+warnings.filterwarnings("ignore", category=FutureWarning)
 
 
 def infer_prob(args):
@@ -202,6 +204,8 @@ class ScoreCalculator(object):
         total_dict = pickle.load(open(prob_path, 'rb'))
 
         ref_on_off_pairs = total_dict['ref_on_off_pairs']
+        # 区間長が正のものだけ残す
+        ref_on_off_pairs = ref_on_off_pairs[ref_on_off_pairs[:, 1] > ref_on_off_pairs[:, 0]]
         ref_midi_notes = total_dict['ref_midi_notes']
         output_dict = total_dict
 
@@ -239,6 +243,7 @@ class ScoreCalculator(object):
 
         # # Detect piano notes from output_dict
         est_on_offs = est_on_off_note_vels[:, 0 : 2]
+        est_on_offs = est_on_offs[est_on_offs[:, 1] > est_on_offs[:, 0]]
         est_midi_notes = est_on_off_note_vels[:, 2]
         est_vels = est_on_off_note_vels[:, 3] * self.velocity_scale
 
@@ -268,36 +273,39 @@ class ScoreCalculator(object):
 
         if self.pedal:
             # Detect piano notes from output_dict
-            ref_pedal_on_off_pairs = output_dict['ref_pedal_on_off_pairs']
+            if 'ref_pedal_on_off_pairs' in output_dict:
+                ref_pedal_on_off_pairs = output_dict['ref_pedal_on_off_pairs']
+                ref_pedal_on_off_pairs = ref_pedal_on_off_pairs[ref_pedal_on_off_pairs[:, 1] > ref_pedal_on_off_pairs[:, 0]]
+                est_pedal_on_offs = est_pedal_on_offs[est_pedal_on_offs[:, 1] > est_pedal_on_offs[:, 0]]
 
             # Calculate pedal metrics
-            if len(ref_pedal_on_off_pairs) > 0:
-                pedal_precision, pedal_recall, pedal_f1, _ = \
-                    mir_eval.transcription.precision_recall_f1_overlap(
-                        ref_intervals=ref_pedal_on_off_pairs, 
-                        ref_pitches=np.ones(ref_pedal_on_off_pairs.shape[0]), 
-                        est_intervals=est_pedal_on_offs, 
-                        est_pitches=np.ones(est_pedal_on_offs.shape[0]), 
-                        onset_tolerance=0.2, 
-                        offset_ratio=self.pedal_offset_ratio, 
-                        offset_min_tolerance=self.pedal_offset_min_tolerance)
+                if len(ref_pedal_on_off_pairs) > 0:
+                    pedal_precision, pedal_recall, pedal_f1, _ = \
+                        mir_eval.transcription.precision_recall_f1_overlap(
+                            ref_intervals=ref_pedal_on_off_pairs, 
+                            ref_pitches=np.ones(ref_pedal_on_off_pairs.shape[0]), 
+                            est_intervals=est_pedal_on_offs, 
+                            est_pitches=np.ones(est_pedal_on_offs.shape[0]), 
+                            onset_tolerance=0.2, 
+                            offset_ratio=self.pedal_offset_ratio, 
+                            offset_min_tolerance=self.pedal_offset_min_tolerance)
 
-                return_dict['pedal_precision'] = pedal_precision
-                return_dict['pedal_recall'] = pedal_recall
-                return_dict['pedal_f1'] = pedal_f1
+                    return_dict['pedal_precision'] = pedal_precision
+                    return_dict['pedal_recall'] = pedal_recall
+                    return_dict['pedal_f1'] = pedal_f1
 
-                y_pred = (np.sign(total_dict['pedal_frame_output'] - 0.5) + 1) / 2
-                y_pred[np.where(y_pred==0.5)] = 0
-                y_true = total_dict['pedal_frame_roll']
-                y_pred = y_pred[0 : y_true.shape[0]]
-                y_true = y_true[0 : y_pred.shape[0]]
-                
-                tmp = metrics.precision_recall_fscore_support(y_true.flatten(), y_pred.flatten())
-                return_dict['pedal_frame_precision'] = tmp[0][1]
-                return_dict['pedal_frame_recall'] = tmp[1][1]
-                return_dict['pedal_frame_f1'] = tmp[2][1]
+                    y_pred = (np.sign(total_dict['pedal_frame_output'] - 0.5) + 1) / 2
+                    y_pred[np.where(y_pred==0.5)] = 0
+                    y_true = total_dict['pedal_frame_roll']
+                    y_pred = y_pred[0 : y_true.shape[0]]
+                    y_true = y_true[0 : y_pred.shape[0]]
+                    
+                    tmp = metrics.precision_recall_fscore_support(y_true.flatten(), y_pred.flatten())
+                    return_dict['pedal_frame_precision'] = tmp[0][1]
+                    return_dict['pedal_frame_recall'] = tmp[1][1]
+                    return_dict['pedal_frame_f1'] = tmp[2][1]
 
-                print('pedal f1: {:.3f}, frame f1: {:.3f}'.format(pedal_f1, return_dict['pedal_frame_f1']))
+                    print('pedal f1: {:.3f}, frame f1: {:.3f}'.format(pedal_f1, return_dict['pedal_frame_f1']))
 
         print('note f1: {:.3f}'.format(note_f1))
 
@@ -347,10 +355,25 @@ def calculate_metrics(args, thresholds=None):
 
     t1 = time.time()
     stats_dict = score_calculator.metrics(thresholds)
-    print('Time: {:.3f}'.format(time.time() - t1))
+    elapsed = time.time() - t1
+    print('Time: {:.3f}'.format(elapsed))
     
     for key in stats_dict.keys():
         print('{}: {:.4f}'.format(key, np.mean(stats_dict[key])))
+
+        # ITERATION番号をファイル名から取得
+    iteration = os.path.basename(args.checkpoint_path).split('_')[0]
+    out_path = "all_metrics.txt"
+
+    # ファイルに追記
+    with open(out_path, "a") as f:
+        f.write(f"Iteration: {iteration}\n")
+        f.write('Time: {:.3f}\n'.format(elapsed))
+        for key in stats_dict.keys():
+            line = '{}: {:.4f}\n'.format(key, np.mean(stats_dict[key]))
+            print(line.strip())
+            f.write(line)
+        f.write('\n')
 
 
 if __name__ == '__main__':
@@ -374,6 +397,9 @@ if __name__ == '__main__':
     parser_metrics.add_argument('--dataset', type=str, required=True, choices=['maestro', 'maps'])
     parser_metrics.add_argument('--split', type=str, required=True)
     parser_metrics.add_argument('--post_processor_type', type=str, default='regression')
+    parser_metrics.add_argument('--checkpoint_path', type=str, required=True)  # ← この行を追加
+
+
 
     args = parser.parse_args()
 

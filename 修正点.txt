@@ -6,3 +6,7 @@
         x = F.dropout(x, p=0.5, training=self.training, inplace=False)  # 修正: inplace=True → inplace=False
 # ...existing code...
 - inference.pyの中で結果の確率スペクトログラムを生成できるようにした（visualize for debugを参照）
+
+- pytorch/calculate_score_for_paper.py
+        各イテレーションについて一気に実行できるように推論結果の保存先を変更した（probs_dir）
+        onsetとoffsetの差が負になる（offsetがonsetに先立つ？）場合があったので、その場合は除外した
