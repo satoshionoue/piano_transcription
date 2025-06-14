@@ -5,7 +5,7 @@
 # CHECKPOINT_PATH="CRNN_note_F1=0.9677_pedal_F1=0.9186.pth"
 # wget -O $CHECKPOINT_PATH "https://zenodo.org/record/4034264/files/CRNN_note_F1%3D0.9677_pedal_F1%3D0.9186.pth?download=1"
 # MODEL_TYPE="Note_pedal"
-python3 pytorch/inference.py --model_type='Regress_onset_offset_frame_velocity_CRNN' --checkpoint_path='ckpts/300000_iterations.pth' --audio_path='resources/2.wav' --cuda
+python3 pytorch/inference.py --model_type='Regress_onset_offset_frame_velocity_CRNN' --checkpoint_path='71000_iterations.pth' --audio_path='est_in/rose1_clean.wav'
 
 # ============ Train piano transcription system from scratch ============
 # MAESTRO dataset directory. Users need to download MAESTRO dataset into this folder.
