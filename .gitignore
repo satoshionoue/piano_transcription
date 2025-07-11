@@ -18,3 +18,5 @@ statistics
 venv
 fake_maestro
 est_in
+result_jpopaug
+*.pth
